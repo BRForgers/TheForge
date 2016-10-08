@@ -14,12 +14,12 @@ package cf.brforgers.bot.utils;
 
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
 
 public class Utils {
-	public static boolean canExecuteCmd(MessageReceivedEvent event) {
+	public static boolean canTalk(GuildMessageReceivedEvent event) {
 		int count;
 		synchronized (Tasks.userTimeout) {
 			count = Tasks.userTimeout.getOrDefault(event.getAuthor(), 0);

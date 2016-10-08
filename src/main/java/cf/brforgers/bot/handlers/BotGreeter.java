@@ -16,12 +16,12 @@ import cf.brforgers.bot.Bot;
 import cf.brforgers.bot.data.Configs;
 import cf.brforgers.bot.utils.Utils;
 import net.dv8tion.jda.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
 
 public class BotGreeter {
-	public static void greet(MessageReceivedEvent event) {
-		event.getChannel().sendMessage("Hello, I'm " + Utils.name(Bot.SELF, event.getGuild()) + ", the guardian of this place. Please type `~~en` or `~~pt` to select your language");
+	public static void greet(GuildMessageReceivedEvent event) {
+		event.getChannel().sendMessage("Hello, I'm " + Utils.name(Bot.SELF, event.getGuild()) + ", the guardian of this place. Please type `~~join en` or `~~join pt` to select your language");
 	}
 
 	@SubscribeEvent
@@ -32,7 +32,7 @@ public class BotGreeter {
 	}
 
 	@SubscribeEvent
-	public static void onMessageReceived(MessageReceivedEvent event) {
+	public static void onMessageReceived(GuildMessageReceivedEvent event) {
 		if (event.getMessage().getRawContent().trim().matches("<@!?" + event.getJDA().getSelfInfo().getId() + ">")) {
 			greet(event);
 		}

@@ -14,9 +14,6 @@ import cf.brforgers.bot.utils.Tasks;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Date;
-
-import static cf.adriantodt.bot.base.gui.GuiTranslationHandler.get;
 
 public class StatsComponent extends JComponent {
 	private static final int mb = 1024 * 1024;
@@ -43,25 +40,13 @@ public class StatsComponent extends JComponent {
 	}
 
 	private void tick() {
-
 		Runtime instance = Runtime.getRuntime();
 		System.gc();
-		if (!Bot.LOADED) {
-			this.msgs[0] = "Please Wait...";
-			this.msgs[1] = null;
-			this.msgs[2] = null;
-			this.msgs[3] = null;
-			this.msgs[4] = null;
-			this.msgs[5] = null;
-
-		} else {
-			this.msgs[0] = String.format(get("stats0"), Statistics.calculate(Statistics.startDate == null ? new Date() : Statistics.startDate, new Date(), GuiTranslationHandler.getLang()));
-			this.msgs[1] = String.format(get("stats1"), Statistics.msgs, Statistics.cmds, Statistics.crashes, Statistics.toofasts, noperm, Statistics.invalidargs);
-			this.msgs[2] = String.format(get("stats2"), Statistics.wgets, Thread.activeCount());
-			this.msgs[3] = String.format(get("stats3"), Statistics.saves, Statistics.loads);
-			this.msgs[4] = String.format(get("stats4"), (instance.totalMemory() - instance.freeMemory()) / mb, instance.totalMemory() / mb, instance.maxMemory() / mb);
-			this.msgs[5] = String.format(get("stats5"), Tasks.cpuUsage);
-		}
+//		this.msgs[0] = "Uptime: " + calculate(startDate == null ? new Date() : startDate, new Date(), "pt_BR");
+//		this.msgs[1] = Statistics.msgs + " msgs; " + cmds + " cmds; " + crashes + " crashes; " + toofasts + " spam; " + noperm + " noperms; " + invalidargs + " invalidargs.";
+//		this.msgs[2] = wgets + " wgets; " + Thread.activeCount() + " active threads.";
+		this.msgs[4] = "RAM(Using/Total/Max): " + ((instance.totalMemory() - instance.freeMemory()) / mb) + " MB/" + (instance.totalMemory() / mb) + " MB/" + (instance.maxMemory() / mb) + " MB";
+		this.msgs[5] = "CPU Usage: " + Tasks.cpuUsage + "%";
 		addToArray(Statistics.msgs - lastValue);
 		lastValue = Statistics.msgs;
 		this.repaint();

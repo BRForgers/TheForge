@@ -22,40 +22,21 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static cf.adriantodt.bot.base.gui.GuiTranslationHandler.get;
-
 public class ConsoleHandler {
 	public static final Map<String, BiConsumer<String, Consumer<String>>> CMDS = new HashMap<>();
 	public static final Map<BiConsumer<String, Consumer<String>>, String> HELP = new HashMap<>();
 
 	static {
-		CMDS.put("?", (s, in) -> CMDS.entrySet().stream().map(entry -> entry.getKey() + " - " + get("cmds." + HELP.get(entry.getValue()))).sorted().forEach(in));
+		CMDS.put("?", (s, in) -> CMDS.entrySet().stream().map(entry -> entry.getKey() + " - " + HELP.get(entry.getValue())).sorted().forEach(in));
 		CMDS.put("help", CMDS.get("?"));
 		CMDS.put("cmds", CMDS.get("?"));
 		HELP.put(CMDS.get("?"), "help");
 
 		CMDS.put("stop", (s, in) -> Bot.stopBot());
-		HELP.put(CMDS.get("stop"), "stop");
+		HELP.put(CMDS.get("stop"), "Stop the Bot");
 
 		CMDS.put("restart", (s, in) -> Bot.restartBot());
-		HELP.put(CMDS.get("restart"), "restart");
-
-//		CMDS.put("load", (s, in) -> {
-//			in.accept(get("load"));
-//			DataManager.loadData();
-//			in.accept(get("done"));
-//		});
-//		HELP.put(CMDS.get("load"), "load");
-//
-//		CMDS.put("save", (s, in) -> {
-//			in.accept(get("save"));
-//			DataManager.saveData();
-//			in.accept(get("done"));
-//		});
-//		HELP.put(CMDS.get("save"), "save");
-
-		CMDS.put("lang", (s, in) -> GuiTranslationHandler.setLang(s));
-		HELP.put(CMDS.get("lang"), "lang");
+		HELP.put(CMDS.get("restart"), "Restart the Bot");
 	}
 
 	public static void handle(String command, Consumer<String> out) {

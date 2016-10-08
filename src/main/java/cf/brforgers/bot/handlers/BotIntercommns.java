@@ -22,7 +22,7 @@ import com.google.gson.JsonPrimitive;
 import net.dv8tion.jda.OnlineStatus;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.ReadyEvent;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
 
@@ -39,7 +39,7 @@ public class BotIntercommns {
 	public static Map<String, BotInfo> info = new HashMap<>();
 
 	public static BotInfo self = new BotInfo() {{
-		p = 5; //David priority = 5
+		p = 9; //TheForge priority = 9
 	}};
 
 	private static BotInfo get(User bot) {
@@ -51,7 +51,7 @@ public class BotIntercommns {
 	}
 
 	public static void updateCmds() {
-		List<String> cmds = Commands.getBaseCommands().keySet().stream().collect(Collectors.toList());
+		List<String> cmds = SimpleCommandHandler.commands.keySet().stream().collect(Collectors.toList());
 		self.cmds.clear();
 		self.cmds.addAll(cmds.stream().map(s -> "&" + s).collect(Collectors.toList()));
 		self.cmds.addAll(cmds.stream().map(s -> "?" + s).collect(Collectors.toList()));
@@ -71,15 +71,15 @@ public class BotIntercommns {
 	}
 
 	@SubscribeEvent
-	public static void onMessageReceived(MessageReceivedEvent event) {
-		if (!event.isPrivate() || !event.getAuthor().isBot() || Bot.API.getSelfInfo().equals(event.getAuthor())) {
+	public static void onMessageReceived(PrivateMessageReceivedEvent event) {
+		if (!event.getAuthor().isBot() || Bot.API.getSelfInfo().equals(event.getAuthor())) {
 			//onSubEvent(event);
 			String base = Utils.splitArgs(event.getMessage().getRawContent(), 2)[0];
 			List<User> bots = info.entrySet().stream().filter(entry -> entry.getValue().cmds.stream().anyMatch(base::equals)).map((entry) -> Bot.API.getUserById(entry.getKey())).collect(Collectors.toList());
 			if (bots.size() != 0 && bots.stream().filter(user -> user.getOnlineStatus() != OnlineStatus.OFFLINE).count() == 0) {
 				bots = info.entrySet().stream().filter(entry -> entry.getValue().p <= self.p && Bot.API.getUserById(entry.getKey()).getOnlineStatus() != OnlineStatus.OFFLINE).map((entry) -> Bot.API.getUserById(entry.getKey())).sorted((user1, user2) -> user1.toString().compareTo(user2.toString())).collect(Collectors.toList());
 				if (bots.indexOf(Bot.SELF) == 0)
-					event.getChannel().sendMessageAsync("*Nenhum dos Bots responsáveis por esse comando está online. Tente mais tarde.*", null);
+					event.getChannel().sendMessageAsync("*None of the Bots responsibles for this command are online. Try again later.*", null);
 			}
 
 			return;

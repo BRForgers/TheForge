@@ -12,13 +12,11 @@
 
 package cf.brforgers.bot;
 
-import cf.adriantodt.bot.data.Guilds;
-import cf.adriantodt.bot.hardimpl.I18nHardImpl;
 import cf.brforgers.bot.data.Configs;
 import cf.brforgers.bot.handlers.BotGreeter;
 import cf.brforgers.bot.handlers.BotIntercommns;
-import cf.brforgers.bot.handlers.CommandHandler;
 import cf.brforgers.bot.handlers.ReadyBuilder;
+import cf.brforgers.bot.handlers.SimpleCommandHandler;
 import cf.brforgers.bot.utils.Statistics;
 import cf.brforgers.bot.utils.Tasks;
 import com.google.gson.Gson;
@@ -33,10 +31,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 public class Bot {
-	public static final Random RAND = new Random();
 	public static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
 	public static final Gson JSON_INTERNAL = new GsonBuilder().create();
 	public static Logger LOGGER = LogManager.getLogger("Bot");
@@ -52,6 +48,18 @@ public class Bot {
 				LOGGER.warn("Owner not regognized. This WILL cause issues (specially PermSystem)");
 			} else {
 				LOGGER.info("Owner recognized: " + user.getUsername() + "#" + user.getDiscriminator() + " (ID: " + user.getId() + ")");
+			}
+		});
+
+		onLoaded.add(() -> {
+			final int[] i = {0};
+			API.getGuilds().stream().filter(guild -> !guild.getId().equals(Configs.getConfigs().guildID)).forEach(guild -> {
+				guild.getManager().leave();
+				i[0]++;
+			});
+
+			if (i[0] != 0) {
+				LOGGER.warn("Quitted from " + i[0] + " guilds.");
 			}
 		});
 	}
@@ -71,9 +79,8 @@ public class Bot {
 					.add(event -> API = event.getJDA())
 					.add(event -> SELF = event.getJDA().getSelfInfo())
 					.add(event -> event.getJDA().getAccountManager().setGame("made of stone"))
-					.add(event -> I18nHardImpl.impl())
 					.add(event -> Statistics.startDate = new Date()),
-				CommandHandler.class, BotIntercommns.class, BotGreeter.class, Guilds.class
+				SimpleCommandHandler.class, BotIntercommns.class, BotGreeter.class
 			).buildBlocking();
 		LOADED = true;
 		onLoaded.forEach(Runnable::run);

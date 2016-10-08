@@ -12,45 +12,44 @@
 
 package cf.brforgers.bot.utils;
 
-import cf.adriantodt.bot.base.I18n;
 import cf.brforgers.bot.Bot;
-import net.dv8tion.jda.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 
 
 public class Answers {
-	public static void exception(MessageReceivedEvent event, Exception e) {
+	public static void exception(GuildMessageReceivedEvent event, Exception e) {
 		dear(event, "uma exceção ocorreu durante a execução do comando:");
 		sendCased(event, Utils.limit(e.toString(), 500), "java");
 		Bot.LOGGER.error("Exception occurred during command \"" + event.getMessage().getContent() + "\": ", e);
 		Statistics.crashes++;
 	}
 
-	public static void toofast(MessageReceivedEvent event) {
+	public static void toofast(GuildMessageReceivedEvent event) {
 		send(event, Formatter.italic(Utils.name(Bot.SELF, event.getGuild()) + " is ignoring you due to your spam. Try again later."));
 	}
 
-	public static void send(MessageReceivedEvent event, String message) {
+	public static void send(GuildMessageReceivedEvent event, String message) {
 		event.getChannel().sendMessageAsync(message, null);
 		Statistics.msgs++;
 	}
 
-	public static void sendCased(MessageReceivedEvent event, String message) {
+	public static void sendCased(GuildMessageReceivedEvent event, String message) {
 		sendCased(event, message, "");
 	}
 
-	public static void sendCased(MessageReceivedEvent event, String message, String format) {
+	public static void sendCased(GuildMessageReceivedEvent event, String message, String format) {
 		send(event, Formatter.encase(message, format));
 	}
 
-	public static void announce(MessageReceivedEvent event, String message) {
+	public static void announce(GuildMessageReceivedEvent event, String message) {
 		send(event, Formatter.boldAndItalic(message));
 	}
 
-	public static void bool(MessageReceivedEvent event, boolean v) {
+	public static void bool(GuildMessageReceivedEvent event, boolean v) {
 		send(event, (v ? ":white_check_mark:" : ":negative_squared_cross_mark:"));
 	}
 
-	public static void dear(MessageReceivedEvent event, String answer) {
-		send(event, Formatter.italic(I18n.getLocalized("answers.dear", event) + " " + event.getAuthor().getUsername() + ", " + answer));
+	public static void dear(GuildMessageReceivedEvent event, String answer) {
+		send(event, Formatter.italic("Dear " + event.getAuthor().getUsername() + ", " + answer));
 	}
 }

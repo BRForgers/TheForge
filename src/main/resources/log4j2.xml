@@ -23,7 +23,6 @@
             <AppenderRef ref="ConsoleOut" level="INFO"/>
             <AppenderRef ref="File"/>
             <AppenderRef ref="ServerGuiConsole" level="INFO"/>
-            <AppenderRef ref="DiscordListeners" level="INFO"/>
         </Root>
     </Loggers>
 </Configuration>

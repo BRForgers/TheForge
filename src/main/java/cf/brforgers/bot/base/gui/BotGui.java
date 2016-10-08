@@ -50,10 +50,11 @@ public class BotGui extends JComponent {
 
 		BotGui ui = new BotGui();
 		JFrame frame = new JFrame("Bot - GUI");
-		addHook(frame::setTitle, "title");
-		addLazyHook(frame::repaint);
-		addLazyHook(frame::revalidate);
-		Bot.onLoaded.add(GuiTranslationHandler::update);
+		Bot.onLoaded.add(() -> {
+			frame.setTitle(Bot.SELF.getUsername() + " - GUI");
+			frame.repaint();
+			frame.revalidate();
+		});
 		ui.frame = frame;
 		frame.add(ui);
 		frame.pack();
@@ -68,21 +69,19 @@ public class BotGui extends JComponent {
 	private JComponent getStatsComponent() throws Exception {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new StatsComponent(), "North");
-		panel.add(this.getGuildListComponent(), "Center");
+		panel.add(this.getUsersListComponent(), "Center");
 		TitledBorder b = new TitledBorder(new EtchedBorder(), "Stats");
-		addHook(b::setTitle, "stats");
 		panel.setBorder(b);
 		return panel;
 	}
 
 	/**
-	 * Generates new GuildListComponent and returns it.
+	 * Generates new UsersListComponent and returns it.
 	 */
-	private JComponent getGuildListComponent() throws Exception {
-		JList list = new GuildListComponent();
+	private JComponent getUsersListComponent() throws Exception {
+		JList list = new UsersListComponent();
 		JScrollPane pane = new JScrollPane(list, 22, 30);
-		TitledBorder b = new TitledBorder(new EtchedBorder(), "Guilds");
-		addHook(b::setTitle, "guilds");
+		TitledBorder b = new TitledBorder(new EtchedBorder(), "Users");
 		pane.setBorder(b);
 		Bot.onLoaded.add(() -> Bot.API.addEventListener(list));
 		return pane;
@@ -104,7 +103,7 @@ public class BotGui extends JComponent {
 			String s = textField.getText().trim();
 
 			if (!s.isEmpty()) {
-				out.accept("<" + get("input") + "> " + s);
+				out.accept("<Input> " + s);
 				ConsoleHandler.handle(s, out);
 			}
 
@@ -117,7 +116,6 @@ public class BotGui extends JComponent {
 		panel.add(pane, "Center");
 		panel.add(textField, "South");
 		TitledBorder b = new TitledBorder(new EtchedBorder(), "Log and chat");
-		addHook(b::setTitle, "logAndChat");
 		panel.setBorder(b);
 		panel.getBorder();
 		Thread thread = new Thread(() -> {

@@ -8,29 +8,26 @@
 package cf.brforgers.bot.base.gui;
 
 import cf.brforgers.bot.Bot;
+import cf.brforgers.bot.data.Configs;
 import net.dv8tion.jda.JDA;
-import net.dv8tion.jda.entities.Guild;
-import net.dv8tion.jda.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.events.guild.GuildLeaveEvent;
+import net.dv8tion.jda.OnlineStatus;
+import net.dv8tion.jda.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
 
 import javax.swing.*;
 import java.util.Vector;
 
-public class GuildListComponent extends JList implements Runnable {
-	public GuildListComponent() {
+import static cf.brforgers.bot.utils.Utils.name;
+
+public class UsersListComponent extends JList implements Runnable {
+	public UsersListComponent() {
 		run();
 		Bot.onLoaded.add(this);
 		Bot.onLoaded.add(() -> Bot.API.addEventListener(this));
 	}
 
 	@SubscribeEvent
-	public void onGuildJoin(GuildJoinEvent event) {
-		run();
-	}
-
-	@SubscribeEvent
-	public void onGuildLeave(GuildLeaveEvent event) {
+	public void onStatusUpdate(UserOnlineStatusUpdateEvent event) {
 		run();
 	}
 
@@ -40,7 +37,10 @@ public class GuildListComponent extends JList implements Runnable {
 		if (Bot.API == null || Bot.API.getStatus() == JDA.Status.INITIALIZING) {
 			vector.add("<Bot being Loaded>");
 		} else {
-			Bot.API.getGuilds().stream().map(Guild::getName).forEach(vector::add);
+			Bot.API.getGuildById(Configs.getConfigs().guildID).getUsers().stream()
+				.filter(user -> user.getOnlineStatus() != OnlineStatus.OFFLINE)
+				.map(user -> name(user, Bot.API.getGuildById(Configs.getConfigs().guildID)) + (user.isBot() ? " [BOT]" : ""))
+				.forEach(vector::add);
 		}
 		this.setListData(vector);
 	}
