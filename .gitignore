@@ -1,0 +1,24 @@
+# TheForge (Based of David4.0)
+
+# Java
+*.class
+*.jar
+hs_err_pid*
+
+# IntelliJ
+*.iws
+/.idea
+/out/
+
+# Gradle
+.gradle
+/build/
+!gradle-wrapper.jar
+
+# David4.0 Runtime
+/server/rethinkdb.exe
+/server/data/
+!start.bat
+!stop.bat
+/logs/
+Configs.json
