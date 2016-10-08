@@ -26,7 +26,7 @@ public class Configs {
 	private static Configs configs = null;
 	public String token = "", ownerID = "", guildID = "";
 
-	public static Configs getConfigs() {
+	public static Configs get() {
 		loadConfig();
 		return configs;
 	}

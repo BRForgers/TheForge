@@ -23,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
+import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.hooks.AnnotatedEventManager;
 import org.apache.logging.log4j.LogManager;
@@ -38,12 +39,13 @@ public class Bot {
 	public static Logger LOGGER = LogManager.getLogger("Bot");
 	public static JDA API = null;
 	public static User SELF = null;
+	public static Guild GUILD = null;
 	public static boolean LOADED = false;
 	public static List<Runnable> onLoaded = new ArrayList<>();
 
 	static {
 		onLoaded.add(() -> {
-			User user = API.getUserById(Configs.getConfigs().ownerID);
+			User user = API.getUserById(Configs.get().ownerID);
 			if (user == null) {
 				LOGGER.warn("Owner not regognized. This WILL cause issues (specially PermSystem)");
 			} else {
@@ -53,7 +55,7 @@ public class Bot {
 
 		onLoaded.add(() -> {
 			final int[] i = {0};
-			API.getGuilds().stream().filter(guild -> !guild.getId().equals(Configs.getConfigs().guildID)).forEach(guild -> {
+			API.getGuilds().stream().filter(guild -> !guild.getId().equals(Configs.get().guildID)).forEach(guild -> {
 				guild.getManager().leave();
 				i[0]++;
 			});
@@ -61,13 +63,15 @@ public class Bot {
 			if (i[0] != 0) {
 				LOGGER.warn("Quitted from " + i[0] + " guilds.");
 			}
+
+			GUILD = API.getGuildById(Configs.get().guildID);
 		});
 	}
 
 	public static void init() throws Exception {
 		Tasks.startAsyncTasks();
 		new JDABuilder()
-			.setBotToken(Configs.getConfigs().token)
+			.setBotToken(Configs.get().token)
 			.setBulkDeleteSplittingEnabled(false)
 			.setAudioEnabled(false)
 			.setEventManager(new AnnotatedEventManager())
@@ -79,6 +83,7 @@ public class Bot {
 					.add(event -> API = event.getJDA())
 					.add(event -> SELF = event.getJDA().getSelfInfo())
 					.add(event -> event.getJDA().getAccountManager().setGame("made of stone"))
+					.add(event -> SimpleCommandHandler.init())
 					.add(event -> Statistics.startDate = new Date()),
 				SimpleCommandHandler.class, BotIntercommns.class, BotGreeter.class
 			).buildBlocking();

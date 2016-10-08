@@ -13,9 +13,11 @@
 package cf.brforgers.bot.handlers;
 
 import cf.brforgers.bot.Bot;
+import cf.brforgers.bot.data.BotData;
 import cf.brforgers.bot.data.Configs;
 import cf.brforgers.bot.utils.Utils;
 import net.dv8tion.jda.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
 
@@ -26,7 +28,7 @@ public class BotGreeter {
 
 	@SubscribeEvent
 	public static void onGuildJoin(GuildJoinEvent event) {
-		if (!event.getGuild().getId().equals(Configs.getConfigs().guildID)) {
+		if (!event.getGuild().getId().equals(Configs.get().guildID)) {
 			event.getGuild().getManager().leave();
 		}
 	}
@@ -36,5 +38,16 @@ public class BotGreeter {
 		if (event.getMessage().getRawContent().trim().matches("<@!?" + event.getJDA().getSelfInfo().getId() + ">")) {
 			greet(event);
 		}
+	}
+
+	@SubscribeEvent
+	public static void onNewUser(GuildMemberJoinEvent event) {
+		if (event.getUser().isBot()) {
+			BotData.get().automaticBotRole.forEach(roleData -> {
+
+			});
+			//event.getGuild().getManager().addRoleToUser(event.getUser(),event.getGuild().getRoleById(BotData.get().))
+		}
+		event.getGuild().getPublicChannel().sendMessage("Hello " + event.getUser().getAsMention() + ", I'm " + Utils.name(Bot.SELF, event.getGuild()) + ", the guardian of this place. Please type `~~join en` or `~~join pt` to select your language");
 	}
 }

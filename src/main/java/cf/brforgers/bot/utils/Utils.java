@@ -67,4 +67,11 @@ public class Utils {
 
 		return buf.toString();
 	}
+
+	public static String idFromRawMention(String string) {
+		if (string.length() > 2 && (string.charAt(0) == '<' && string.charAt(1) == '@' && string.charAt(string.length() - 1) == '>'))
+			string = string.substring(2, string.length() - 1);
+		if (string.length() > 0 && string.charAt(0) == '!') string = string.substring(1);
+		return string.toLowerCase();
+	}
 }

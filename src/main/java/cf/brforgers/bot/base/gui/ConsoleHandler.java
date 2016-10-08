@@ -30,7 +30,7 @@ public class ConsoleHandler {
 		CMDS.put("?", (s, in) -> CMDS.entrySet().stream().map(entry -> entry.getKey() + " - " + HELP.get(entry.getValue())).sorted().forEach(in));
 		CMDS.put("help", CMDS.get("?"));
 		CMDS.put("cmds", CMDS.get("?"));
-		HELP.put(CMDS.get("?"), "help");
+		HELP.put(CMDS.get("?"), "Help");
 
 		CMDS.put("stop", (s, in) -> Bot.stopBot());
 		HELP.put(CMDS.get("stop"), "Stop the Bot");
