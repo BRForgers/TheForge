@@ -13,16 +13,12 @@
 package cf.brforgers.bot.utils;
 
 import com.sun.management.OperatingSystemMXBean;
-import net.dv8tion.jda.entities.User;
 
 import java.lang.management.ManagementFactory;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Tasks {
-	static final Map<User, Integer> userTimeout = new HashMap<>();
 	public static double cpuUsage = 0;
 
 	public static void startAsyncTask(Runnable scheduled, int everySeconds) {
@@ -30,14 +26,7 @@ public class Tasks {
 	}
 
 	public static void startAsyncTasks() {
-
 		final OperatingSystemMXBean os = ((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean());
 		startAsyncTask(() -> cpuUsage = (Math.floor(os.getProcessCpuLoad() * 10000) / 100), 2);
-
-		startAsyncTask(() -> {
-			synchronized (userTimeout) {
-				userTimeout.replaceAll((user, integer) -> Math.max(0, integer - 1));
-			}
-		}, 5);
 	}
 }

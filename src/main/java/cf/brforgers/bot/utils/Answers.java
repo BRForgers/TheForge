@@ -24,25 +24,13 @@ public class Answers {
 		Statistics.crashes++;
 	}
 
-	public static void toofast(GuildMessageReceivedEvent event) {
-		send(event, Formatter.italic(Utils.name(Bot.SELF, event.getGuild()) + " is ignoring you due to your spam. Try again later."));
-	}
-
 	public static void send(GuildMessageReceivedEvent event, String message) {
 		event.getChannel().sendMessageAsync(message, null);
 		Statistics.msgs++;
 	}
 
-	public static void sendCased(GuildMessageReceivedEvent event, String message) {
-		sendCased(event, message, "");
-	}
-
 	public static void sendCased(GuildMessageReceivedEvent event, String message, String format) {
 		send(event, Formatter.encase(message, format));
-	}
-
-	public static void announce(GuildMessageReceivedEvent event, String message) {
-		send(event, Formatter.boldAndItalic(message));
 	}
 
 	public static void bool(GuildMessageReceivedEvent event, boolean v) {

@@ -14,20 +14,10 @@ package cf.brforgers.bot.utils;
 
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
 
 public class Utils {
-	public static boolean canTalk(GuildMessageReceivedEvent event) {
-		int count;
-		synchronized (Tasks.userTimeout) {
-			count = Tasks.userTimeout.getOrDefault(event.getAuthor(), 0);
-			Tasks.userTimeout.put(event.getAuthor(), count + 1);
-		}
-		return count + 1 < 5;
-	}
-
 	public static String[] splitArgs(String args, int expectedArgs) {
 		String[] raw = args.split("\\s+", expectedArgs), normalized = new String[expectedArgs];
 

@@ -13,13 +13,15 @@ import cf.brforgers.bot.utils.Tasks;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.util.Date;
+
+import static cf.brforgers.bot.utils.Statistics.*;
 
 public class StatsComponent extends JComponent {
 	private static final int mb = 1024 * 1024;
 	private final int[] graphicValues = new int[229];
 	private final String[] msgs = new String[11];
-	private int vp = 0, lastValue = 0;
+	private int lastValue = 0;
 
 	public StatsComponent() {
 		this.setPreferredSize(new Dimension(456, 246));
@@ -35,16 +37,12 @@ public class StatsComponent extends JComponent {
 		graphicValues[graphicValues.length - 1] = value;
 	}
 
-	private int getMax() {
-		return Arrays.stream(graphicValues).max().orElse(0);
-	}
-
 	private void tick() {
 		Runtime instance = Runtime.getRuntime();
 		System.gc();
-//		this.msgs[0] = "Uptime: " + calculate(startDate == null ? new Date() : startDate, new Date(), "pt_BR");
-//		this.msgs[1] = Statistics.msgs + " msgs; " + cmds + " cmds; " + crashes + " crashes; " + toofasts + " spam; " + noperm + " noperms; " + invalidargs + " invalidargs.";
-//		this.msgs[2] = wgets + " wgets; " + Thread.activeCount() + " active threads.";
+		this.msgs[0] = "Uptime: " + calculate(startDate, new Date());
+		this.msgs[1] = Statistics.msgs + " msgs; " + cmds + " cmds; " + crashes + " crashes; " + toofasts + " spam.";
+		this.msgs[2] = Thread.activeCount() + " active threads.";
 		this.msgs[4] = "RAM(Using/Total/Max): " + ((instance.totalMemory() - instance.freeMemory()) / mb) + " MB/" + (instance.totalMemory() / mb) + " MB/" + (instance.maxMemory() / mb) + " MB";
 		this.msgs[5] = "CPU Usage: " + Tasks.cpuUsage + "%";
 		addToArray(Statistics.msgs - lastValue);

@@ -28,26 +28,22 @@ public class BotGreeter {
 
 	@SubscribeEvent
 	public static void onGuildJoin(GuildJoinEvent event) {
-		if (!event.getGuild().getId().equals(Configs.get().guildID)) {
-			event.getGuild().getManager().leave();
-		}
+		if (!event.getGuild().getId().equals(Configs.get().guildID)) event.getGuild().getManager().leave();
 	}
 
 	@SubscribeEvent
 	public static void onMessageReceived(GuildMessageReceivedEvent event) {
-		if (event.getMessage().getRawContent().trim().matches("<@!?" + event.getJDA().getSelfInfo().getId() + ">")) {
+		if (event.getMessage().getRawContent().trim().matches("<@!?" + event.getJDA().getSelfInfo().getId() + ">"))
 			greet(event);
-		}
 	}
 
 	@SubscribeEvent
 	public static void onNewUser(GuildMemberJoinEvent event) {
-		if (event.getUser().isBot()) {
-			BotData.get().automaticBotRole.forEach(roleData -> {
+		if (event.getUser().isBot())
+			BotData.get().automaticBotRole.forEach(roleData -> event.getGuild().getManager().addRoleToUser(event.getUser(), roleData.getRole()));
+		else
+			BotData.get().automaticUserRole.forEach(roleData -> event.getGuild().getManager().addRoleToUser(event.getUser(), roleData.getRole()));
 
-			});
-			//event.getGuild().getManager().addRoleToUser(event.getUser(),event.getGuild().getRoleById(BotData.get().))
-		}
 		event.getGuild().getPublicChannel().sendMessage("Hello " + event.getUser().getAsMention() + ", I'm " + Utils.name(Bot.SELF, event.getGuild()) + ", the guardian of this place. Please type `~~join en` or `~~join pt` to select your language");
 	}
 }

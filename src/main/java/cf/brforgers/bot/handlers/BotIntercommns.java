@@ -21,7 +21,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import net.dv8tion.jda.OnlineStatus;
 import net.dv8tion.jda.entities.User;
-import net.dv8tion.jda.events.ReadyEvent;
 import net.dv8tion.jda.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.events.user.UserOnlineStatusUpdateEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
@@ -53,8 +52,7 @@ public class BotIntercommns {
 	public static void updateCmds() {
 		List<String> cmds = SimpleCommandHandler.commands.keySet().stream().collect(Collectors.toList());
 		self.cmds.clear();
-		self.cmds.addAll(cmds.stream().map(s -> "&" + s).collect(Collectors.toList()));
-		self.cmds.addAll(cmds.stream().map(s -> "?" + s).collect(Collectors.toList()));
+		SimpleCommandHandler.prefixes.forEach(s -> self.cmds.addAll(cmds.stream().map(s::concat).collect(Collectors.toList())));
 	}
 
 	private static void pm(User user, String content) {
@@ -190,11 +188,10 @@ public class BotIntercommns {
 		}
 	}
 
-	@SubscribeEvent
-	public static void onReady(ReadyEvent event) {
+	public static void init() {
 		updateCmds();
-		info.put(event.getJDA().getSelfInfo().getId(), self);
-		event.getJDA().getUsers().stream().filter(user -> user.isBot() && !user.equals(event.getJDA().getSelfInfo()) && user.getOnlineStatus() != OnlineStatus.OFFLINE).forEach(BotIntercommns::start);
+		info.put(Bot.API.getSelfInfo().getId(), self);
+		Bot.API.getUsers().stream().filter(user -> user.isBot() && !user.equals(Bot.API.getSelfInfo()) && user.getOnlineStatus() != OnlineStatus.OFFLINE).forEach(BotIntercommns::start);
 	}
 
 	public static class BotInfo {

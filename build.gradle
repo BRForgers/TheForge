@@ -23,7 +23,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 group 'cf.brforgers.bot'
-version '1.0-BETA'
+version '1.0'
 
 mainClassName = "cf.brforgers.bot.Startup"
 
@@ -39,7 +39,6 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.6.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.2'
     compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
-    compile group: 'com.googlecode.juniversalchardet', name: 'juniversalchardet', version: '1.0.3'
 }
 
 def commonManifest = {
@@ -49,7 +48,6 @@ def commonManifest = {
 shadowJar {
     classifier 'fat'
     transform(new com.github.jengelman.gradle.plugins.shadow.transformers.Transformer() {
-
         // this is an adapter required for generating a fat jar with correct log4j2 output
 
         PluginsCacheFileTransformer target = new PluginsCacheFileTransformer();

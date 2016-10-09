@@ -12,6 +12,7 @@
 
 package cf.brforgers.bot;
 
+import cf.brforgers.bot.data.BotData;
 import cf.brforgers.bot.data.Configs;
 import cf.brforgers.bot.handlers.BotGreeter;
 import cf.brforgers.bot.handlers.BotIntercommns;
@@ -35,7 +36,6 @@ import java.util.List;
 
 public class Bot {
 	public static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-	public static final Gson JSON_INTERNAL = new GsonBuilder().create();
 	public static Logger LOGGER = LogManager.getLogger("Bot");
 	public static JDA API = null;
 	public static User SELF = null;
@@ -65,6 +65,8 @@ public class Bot {
 			}
 
 			GUILD = API.getGuildById(Configs.get().guildID);
+			BotData.get().validateAll();
+			BotData.get().save();
 		});
 	}
 
@@ -92,6 +94,7 @@ public class Bot {
 		onLoaded = null;
 		LOGGER = LogManager.getLogger(SELF.getUsername());
 		LOGGER.info("Bot: " + SELF.getUsername() + " (#" + SELF.getId() + ")");
+		BotIntercommns.init();
 	}
 
 	public static void stopBot() {

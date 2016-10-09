@@ -11,10 +11,7 @@ import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.hooks.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -70,7 +67,8 @@ public class SimpleCommandHandler {
 			bool(event, true);
 		});
 
-		help.put(commands.get("nick"), "List the Joinable Roles");
+		help.put(commands.get("nick"), "Set your nick");
+		help.put(commands.get("setnick"), "Set other's nick");
 
 
 		commands.put("assign", (args, event) -> {
@@ -82,6 +80,21 @@ public class SimpleCommandHandler {
 				send(event, "Please assign someone that is not me.");
 				return;
 			}
+			if (args.trim().equals("*")) {
+				Bot.GUILD.getManager()
+					.addRoleToUser(
+						target,
+						BotData.get().assignableRoles.stream()
+							.filter(BotData.RoleData::validate)
+							.filter(roleData -> roleData.permRequired <= getPermLevel(event.getAuthor()))
+							.filter(roleData -> roleData != null)
+							.map(BotData.RoleData::getRole)
+							.toArray(Role[]::new)
+					).update();
+				bool(event, true);
+				return;
+			}
+
 			BotData.RoleData role = BotData.get().assignableRoles.stream().filter(roleData -> roleData.name.equals(arg[1])).findFirst().orElse(null);
 			if (role == null) {
 				send(event, "Role can't be assigned.");
@@ -95,9 +108,61 @@ public class SimpleCommandHandler {
 			}
 		});
 
+		commands.put("unassign", (args, event) -> {
+			if (getPermLevel(event.getAuthor()) == 0) return;
+			String[] arg = splitArgs(args, 2);
+			User target =
+				(event.getMessage().getMentionedUsers().isEmpty() ? null : event.getMessage().getMentionedUsers().get(event.getMessage().getMentionedUsers().size() - 1));
+			if (target == null || target == Bot.SELF) {
+				send(event, "Please assign someone that is not me.");
+				return;
+			}
+			if (args.trim().equals("*")) {
+				Bot.GUILD.getManager()
+					.removeRoleFromUser(
+						target,
+						BotData.get().assignableRoles.stream()
+							.filter(BotData.RoleData::validate)
+							.filter(roleData -> roleData.permRequired <= getPermLevel(event.getAuthor()))
+							.filter(roleData -> roleData != null)
+							.map(BotData.RoleData::getRole)
+							.toArray(Role[]::new)
+					).update();
+				bool(event, true);
+				return;
+			}
+
+			BotData.RoleData role = BotData.get().assignableRoles.stream().filter(roleData -> roleData.name.equals(arg[1])).findFirst().orElse(null);
+			if (role == null) {
+				send(event, "Role can't be assigned.");
+			} else if (!role.validate()) {
+				send(event, "Role is invalid.");
+			} else if (getPermLevel(event.getAuthor()) < role.permRequired) {
+				send(event, "Not enough Permissions.");
+			} else {
+				Bot.GUILD.getManager().removeRoleFromUser(target, role.getRole()).update();
+				bool(event, true);
+			}
+		});
+
 		help.put(commands.get("assign"), "Assign Roles to someone");
+		help.put(commands.get("unassign"), "Unassign Roles to someone");
 
 		commands.put("join", (args, event) -> {
+			if (args.trim().equals("*")) {
+				Bot.GUILD.getManager()
+					.addRoleToUser(
+						event.getAuthor(),
+						BotData.get().assignableRoles.stream()
+							.filter(BotData.RoleData::validate)
+							.filter(roleData -> roleData.permRequired <= getPermLevel(event.getAuthor()))
+							.filter(roleData -> roleData != null)
+							.map(BotData.RoleData::getRole)
+							.toArray(Role[]::new)
+					).update();
+				bool(event, true);
+				return;
+			}
 			BotData.RoleData role = BotData.get().assignableRoles.stream().filter(roleData -> roleData.name.equals(args)).findFirst().orElse(null);
 			if (role == null) {
 				send(event, "Role can't be assigned.");
@@ -111,7 +176,36 @@ public class SimpleCommandHandler {
 			}
 		});
 
+		commands.put("leave", (args, event) -> {
+			if (args.trim().equals("*")) {
+				Bot.GUILD.getManager()
+					.removeRoleFromUser(
+						event.getAuthor(),
+						BotData.get().assignableRoles.stream()
+							.filter(BotData.RoleData::validate)
+							.filter(roleData -> roleData.permRequired <= getPermLevel(event.getAuthor()))
+							.filter(roleData -> roleData != null)
+							.map(BotData.RoleData::getRole)
+							.toArray(Role[]::new)
+					).update();
+				bool(event, true);
+				return;
+			}
+			BotData.RoleData role = BotData.get().assignableRoles.stream().filter(roleData -> roleData.name.equals(args)).findFirst().orElse(null);
+			if (role == null) {
+				send(event, "Role can't be unassigned.");
+			} else if (!role.validate()) {
+				send(event, "Role is invalid.");
+			} else if (getPermLevel(event.getAuthor()) < role.permRequired) {
+				send(event, "Not enough Permissions.");
+			} else {
+				Bot.GUILD.getManager().removeRoleFromUser(event.getAuthor(), role.getRole()).update();
+				bool(event, true);
+			}
+		});
+
 		help.put(commands.get("join"), "Join a Role");
+		help.put(commands.get("leave"), "Leave a Role");
 
 		commands.put("allow", (args, event) -> {
 			if (getPermLevel(event.getAuthor()) != 2) return;
@@ -225,6 +319,30 @@ public class SimpleCommandHandler {
 
 		help.put(commands.get("add"), "Add a new Joinable Role");
 
+		commands.put("rm", (arg, event) -> {
+			if (getPermLevel(event.getAuthor()) != 2) return; //rm NAME
+			if (arg.trim().isEmpty()) {
+				send(event, "Role is invalid.");
+				return;
+			}
+
+			BotData.RoleData data = BotData.get().assignableRoles.stream()
+				.filter(BotData.RoleData::validate)
+				.filter(roleData -> roleData.permRequired <= getPermLevel(event.getAuthor()))
+				.filter(roleData -> roleData != null)
+				.findFirst().orElse(null);
+			if (data == null) {
+				send(event, "Role is invalid.");
+				return;
+			}
+
+			BotData.get().assignableRoles.remove(data);
+			BotData.get().save();
+			bool(event, true);
+		});
+
+		help.put(commands.get("rm"), "Remove a new Joinable Role");
+
 		commands.put("allowed", (args, event) -> {
 			List<User> users = new ArrayList<>();
 			BotData.get().validateAll();
@@ -243,6 +361,58 @@ public class SimpleCommandHandler {
 		commands.put("defaultRoles", (arg, event) -> {
 			if (getPermLevel(event.getAuthor()) != 2) return;
 			String[] args = splitArgs(arg, 2);
+			if (!args[0].equals("bots") && !args[0].equals("users") && !args[0].equals("all")) {
+				send(event, "Specify: `bots, users, all`");
+				return;
+			}
+
+			if (args[1].trim().isEmpty()) {
+				send(event, "Tokens: `+role; clear; get; list; push; save`");
+				return;
+			}
+
+			List<BotData.RoleData> list = new ArrayList<>();
+			if (args[0].equals("bots") || args[0].equals("all")) list.addAll(BotData.get().automaticBotRole);
+			if (args[0].equals("users") || args[0].equals("all")) list.addAll(BotData.get().automaticUserRole);
+
+			String[] all = args[1].split("\\s+", -1);
+			for (String each : all) {
+				if (each.charAt(0) == '+') {
+					String v = each.substring(1).toLowerCase();
+					if (!list.stream().filter(BotData.RoleData::validate).map(roleData -> roleData.name.toLowerCase()).anyMatch(v::equals)) {
+						List<Role> roles = Bot.GUILD.getRoles().stream()
+							.filter(role -> role.getName().toLowerCase().replace(" ", "_").equals(v))
+							.filter(role -> role != Bot.GUILD.getPublicRole())
+							.collect(Collectors.toList());
+						if (roles.isEmpty()) {
+							send(event, "Role `" + v + "` is invalid.");
+							return;
+						} else {
+							BotData.RoleData data = new BotData.RoleData();
+							data.permRequired = -1;
+							data.id = roles.get(0).getId();
+							data.name = roles.get(0).getName();
+							list.add(data);
+						}
+					}
+				} else if (each.toLowerCase().equals("clear")) {
+					list.clear();
+				} else if (each.toLowerCase().equals("list") || each.toLowerCase().equals("get")) {
+					send(event, Arrays.toString(list.stream().map(roleData -> roleData.name).toArray()));
+				} else if (each.toLowerCase().equals("push") || each.toLowerCase().equals("save")) {
+					if (args[0].equals("bots") || args[0].equals("all")) {
+						BotData.get().automaticBotRole.clear();
+						BotData.get().automaticBotRole.addAll(list);
+					}
+					if (args[0].equals("users") || args[0].equals("all")) {
+						BotData.get().automaticUserRole.clear();
+						BotData.get().automaticUserRole.addAll(list);
+					}
+
+					BotData.get().save();
+				}
+
+			}
 		});
 
 		help.put(commands.get("defaultRoles"), "Control the Default Roles given to a User");
@@ -275,6 +445,12 @@ public class SimpleCommandHandler {
 		});
 
 		help.put(commands.get("fixthatnpe"), "Fix THAT NPE");
+
+		commands.put("stats", (arg, event) -> Statistics.printStats(event));
+
+		commands.put("uptime", commands.get("stats"));
+
+		help.put(commands.get("stats"), "Session Statistics");
 	}
 
 	@SubscribeEvent
